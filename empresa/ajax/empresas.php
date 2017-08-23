@@ -137,7 +137,7 @@
 							id = $id
 					");
 					
-					$_SESSION["ctc"]["empresa"] = $info;
+					/*$_SESSION["ctc"]["empresa"] = $info;
 					$_SESSION["ctc"]["id"] = $info["id"];
 					$_SESSION["ctc"]["uid"] = $info["uid"];
 					$_SESSION["ctc"]["name"] = $info["nombre"];
@@ -151,7 +151,7 @@
 					}
 					else {
 						$_SESSION["ctc"]["pic"] = 'avatars/user.png';
-					}
+					}*/
 
 					$destinatario = $_REQUEST['email'];
 					$asunto = "Confirmación de correo electronico - JOBBERS ARGENTINA";

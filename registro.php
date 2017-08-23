@@ -189,7 +189,7 @@
 		<script type="text/javascript" src="vendor/sweetalert2/sweetalert2.min.js"></script>
 		<script>
 			function isEmail(email) {
-			  var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+			  var regex = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/;
 			  return regex.test(email);
 			}
 			
@@ -208,13 +208,13 @@
 				/*FB.Event.subscribe('auth.authResponseChange', function(response) {
 					if (response.status === 'connected') {
 						//document.getElementById("message").innerHTML +=  "<br>Connected to Facebook";
-						console.log("Connected to Facebook");
+						//console.log("Connected to Facebook");
 						getUserInfo();
 					}    
 					else if (response.status === 'not_authorized') {
-						console.log("Failed to Connect");
+						//console.log("Failed to Connect");
 					} else {
-						console.log("Logged Out");
+						//console.log("Logged Out");
 					}
 				});
 
@@ -228,14 +228,13 @@
 						getUserInfo();
 					}
 					else {
-					 	console.log('User cancelled login or did not fully authorize.');
+					 	//console.log('User cancelled login or did not fully authorize.');
 					}
 				},{scope: 'id,name,email,picture'});*/
 
 				FB.login(function(response) {
-
 					if (response.authResponse) {
-						console.log('Welcome!  Fetching your information.... ');
+						//console.log('Welcome!  Fetching your information.... ');
 						//console.log(response); // dump complete info
 						//access_token = response.authResponse.accessToken; //get access token
 						//user_id = response.authResponse.userID; //get FB UID
@@ -247,7 +246,7 @@
 
 					} else {
 						//user hit cancel button
-						console.log('User cancelled login or did not fully authorize.');
+						//console.log('User cancelled login or did not fully authorize.');
 
 					}
 				}, {
@@ -257,15 +256,19 @@
 			}
 
 		  	function getUserInfo() {
-				FB.api('/me',{fields:'id,name,email,picture'}, function(response) {
+				FB.api('/me',{fields:'id,first_name,last_name,email,picture,gender '}, function(response) {
+					
+					console.log(response);
+					gender = (response.gender === 'male')?'1':'2';
+
 					$.ajax({
 						type: 'POST',
 						url: 'ajax/user.php',
-						data: 'op=10&e=' + response.email + '&n=' + response.name + '&p=' + response.picture.data.url,
+						data: 'op=10&e=' + response.email + '&n=' + response.first_name +'&a=' + response.last_name + '&p=' + response.picture.data.url+ '&g=' + gender,
 						dataType: 'json',
 						success: function(data) {
 							if(data.status == 1) {
-								console.log('Muestra algo');
+								//console.log('Muestra algo');
 								swal({
 									title: 'Excelente!',
 									text: 'Registrado Satisfactoriamente.',
@@ -279,7 +282,7 @@
 								//window.location.assign("./");
 							}
 							else {
-								console.log('Muestra algo 2');
+								//console.log('Muestra algo 2');
 								swal({
 									title: 'Información!',
 									text: 'Usuario existente.',
@@ -333,6 +336,8 @@
 											});*/
 											swal("INFORMACIÓN!", "Para confirmar tu registro, revisa la bandeja de tu correo electronico.", "info");
 											$('.form-material')[0].reset();
+										} else if(data.status == 0){
+											//console.log("Error al enviar correo electronico");
 										}
 										else {
 											swal({
