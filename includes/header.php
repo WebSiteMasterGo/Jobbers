@@ -1,6 +1,30 @@
-	<script>
+
+<script>
 	var urlCurrent = '<?php echo (strstr($_SERVER["REQUEST_URI"], "empresa/") ? "" : "empresa/"); ?>';
 	var typeUser = '<?php echo isset($_SESSION["ctc"]) ? $_SESSION["ctc"]["type"] : 0; ?>';
+</script>
+<script type="text/javascript">
+	window.fbAsyncInit = function() {
+		FB.init({
+			appId      : '1785394951770843',
+			status	   : true,
+			xfbml      : true,
+			version    : 'v2.9'
+		});
+		FB.AppEvents.logPageView();
+	};
+
+	(function(d, s, id){
+		var js, fjs = d.getElementsByTagName(s)[0];
+		if (d.getElementById(id)) {return;}
+		js = d.createElement(s); js.id = id;
+		js.src = "//connect.facebook.net/en_US/sdk.js";
+		fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'facebook-jssdk'));
+
+	function Logout(){
+		FB.logout(function(){});
+	}
 </script>
 <style>
 	@media only screen and (max-width: 1050px) {
@@ -139,7 +163,7 @@
 									<i class="ti-clipboard  m-r-0-5"></i> Mis servicios free lance
 								</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item 1logout" href="salir.php"><i class="ti-power-off m-r-0-5"></i> Cerrar sesión</a>
+								<a class="dropdown-item 1logout" href="salir.php" onclick="Logout();"><i class="ti-power-off m-r-0-5"></i> Cerrar sesión</a>
 							</div>
 						</li>
 						<li class="nav-item hidden-md-up">

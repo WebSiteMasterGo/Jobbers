@@ -96,9 +96,33 @@
 
 				$mensaje .= "Si no funciona el enlace anterior puedes acceder a la siguiente URL: $enlace";
 
-				$exito = mail($destinatario,$asunto,$mensaje,$headers);
+				$mensaje .= "<br>
+				<br>
+				<br> Gracias, <br><br> <b>Team JobbersArgentina.</b>";
 
-				echo json_encode(array("status" => 1));
+				# CONDICIONAL PARA VALIDAR SI EL CORREO PERTENECE A "HOTMAIL" U "OUTLOOK"
+				if (strstr($destinatario, "hotmail") || strstr($destinatario, "outlook")) {
+					$mensaje= "Saludos $_REQUEST[name],<br><br>";
+
+					$nombre_link = str_replace(array(" ","á","é","í","ó","ú","Á","É","Í","Ó","Ú"),array("%20","a","e","i","o","u","A","E","I","O","U"),$_REQUEST['name']);
+
+					$mensaje .= "Por favor confirma el registro de su empresa en la plataforma de Jobbers Argentina copiando la siguiente URL: <b>www.jobbersargentina.com/bienvenida.php?id=$idU&n=$nombre_link&a=$apellido_link </b> y pegandola en su navegador. <br><br><br>";
+
+					$mensaje .= "<br>
+					<br>
+					<br> Gracias, <br><br> <b>Team JobbersArgentina.</b>";
+				}
+
+
+				if (mail($destinatario,$asunto,$mensaje,$headers)) {
+					echo json_encode(array(
+						"status" => 1,
+					));
+				} else {
+					echo json_encode(array(
+						"status" => 0,
+					));
+				}
               }
          break;
          case LOGOUT:
@@ -244,13 +268,30 @@
 			
 			break;
 		case LOGIN_FB:
-			$info = $db->getRow("SELECT * FROM trabajadores WHERE correo_electronico='$_REQUEST[e]'");
+			$info = $db->getRow("SELECT * FROM trabajadores WHERE correo_electronico='$_REQUEST[e]' limit 1");
 			if($info) {
+
                 $_SESSION["ctc"]["id"] = $info["id"];
 				$_SESSION["ctc"]["name"] = $info["nombres"];
 				$_SESSION["ctc"]["lastName"] = $info["apellidos"];
 				$_SESSION["ctc"]["email"] = $info["correo_electronico"];
 				$_SESSION["ctc"]["type"] = 2;
+
+				// POR JD 01-11-2017
+				$file_name = 'login_users.txt';
+				$datos_ = '';
+				$datos_ = 'Fecha =>'.date('Y-m-d H:i:s'). ' -- ';
+				$datos_ .= 'CorreoFB E=>'.$_REQUEST[e]. ' -- ';
+				$datos_ .= 'CorreoBD =>'.$info["correo_electronico"]. ' -- ';
+				$datos_ .= "Consulta => SELECT * FROM trabajadores WHERE correo_electronico='$_REQUEST[e]' limit 1 -- ";
+				$datos_ .= 'Sesion => Correo'.$_SESSION["ctc"]["email"].PHP_EOL;
+				
+				if (file_exists($file_name)) {
+	    			file_put_contents($file_name, $datos_, FILE_APPEND);
+				} else { 
+	    			file_put_contents($file_name, $datos_);
+				}
+
 				if($info["id_imagen"] != 0) {
 					/*$isfb = $db->getOne("SELECT id FROM imagenes WHERE id=".$info["id_imagen"]." AND nombre='$_REQUEST[p]'");
 					if($isfb) {
@@ -278,18 +319,26 @@
 			}
 			else {
 				$id = $db->getOne("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'db678638694' AND TABLE_NAME = 'trabajadores'");
+				$uid = $db->getOne("SELECT valor FROM uid");
 				//$idi = $db->getOne("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'db678638694' AND TABLE_NAME = 'imagenes'");
 				$nombres = $_REQUEST['n'];
+				$apellidos = $_REQUEST['a'];
 				$correo = $_REQUEST['e'];
-				$picture = $_REQUEST['p'];
-				$db->query("INSERT INTO trabajadores (id, id_imagen, id_sexo, id_estado_civil, id_tipo_documento_identificacion, id_pais, provincia, localidad, calle, id_metodo_acceso, nombres, apellidos, numero_documento_identificacion, fecha_nacimiento, telefono, telefono_alternativo, usuario, clave, correo_electronico, fecha_creacion, fecha_actualizacion) VALUES ('$id', '0', '', '', '', '', '', '', '', '', '$nombres', '', '', NULL, '', '',  '', '', '$correo', '".date("Y-m-d h:i:s")."', '".date("Y-m-d h:i:s")."')");
+				$pictureURL = $_REQUEST['p'];
+				$genero = $_REQUEST['g'];
+				$db->query("INSERT INTO trabajadores (id,uid, id_imagen, id_sexo, id_estado_civil, 
+				id_tipo_documento_identificacion, id_pais, provincia, localidad, 
+				calle, id_metodo_acceso, nombres, apellidos, numero_documento_identificacion,
+				fecha_nacimiento, telefono, telefono_alternativo, usuario, clave, correo_electronico,
+				fecha_creacion, fecha_actualizacion) 
+				VALUES ('$id','$uid' ,'0', '$genero', '', '', '', '', '', '', '', '$nombres', '$apellidos', '', NULL, '', '',  '', '', '$correo', '".date("Y-m-d h:i:s")."', '".date("Y-m-d h:i:s")."')");
 				//$db->query("INSERT INTO imagenes (id, titulo, directorio, extension, fecha_creacion, fecha_actualizacion, nombre) VALUES ($idi, '', '', '', '".date("Y-m-d h:i:s")."', '".date("Y-m-d h:i:s")."', '$_REQUEST[p]')");
 				$_SESSION["ctc"]["id"] = $id;
 				$_SESSION["ctc"]["name"] = $_REQUEST["n"];
-				$_SESSION["ctc"]["lastName"] = "";
+				$_SESSION["ctc"]["lastName"] = $_REQUEST["a"];
 				$_SESSION["ctc"]["email"] = $_REQUEST["e"];
 				$_SESSION["ctc"]["type"] = 2;
-				$_SESSION["ctc"]["pic"] = 'avatars/user.png';
+				$_SESSION["ctc"]["pic"] = $_REQUEST["p"];
 				echo json_encode(array("status" => 1));
 			}
 			break;
